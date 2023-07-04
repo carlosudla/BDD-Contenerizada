@@ -1,0 +1,123 @@
+import os
+from faker import Faker
+import mysql.connector
+os.environ['MYSQL_TCP_PORT'] = '33060'
+
+# Crear conexión a la base de datos
+cnx = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="Proyecto123",
+    database="BURGERKONG",
+    port=os.environ['MYSQL_TCP_PORT']
+)
+
+# Crear objeto Faker
+fake = Faker()
+cursor = cnx.cursor()
+print ('conexion exitosa')
+
+# Generar datos para la tabla clientes
+clientes_data = []
+for _ in range(50):
+    nombre = fake.name()
+direccion = fake.address()
+    telefono = fake.phone_number()[:10]
+    clientes_data.append((nombre, direccion, telefono))
+
+# Generar datos para la tabla empleados
+empleados_data = []
+for _ in range(50):
+    nombre = fake.name()
+    direccion = fake.address()
+    telefono = fake.phone_number()[:10]
+    salario = fake.random_int(min=1000, max=5000)
+    empleados_data.append((nombre, direccion, telefono, salario))
+
+# Generar datos para la tabla proveedores
+proveedores_data = []
+for _ in range(50):
+    nombre = fake.company()
+    direccion = fake.address()
+    telefono = fake.phone_number()[:15]
+    salario = fake.random_int(min=1000, max=5000)
+    proveedores_data.append((nombre, direccion, telefono, salario))
+
+# Generar datos para la tabla categorias
+categorias_data = []
+for _ in range(50):
+    nombre = fake.word()
+    categorias_data.append((nombre,))
+
+# Generar datos para la tabla productos
+productos_data = []
+for _ in range(50):
+    nombre = fake.word()
+    precio = fake.random_int(min=10, max=100)
+    categoria_id = fake.random_int(min=1, max=50)
+    proveedor_id = fake.random_int(min=1, max=50)
+    productos_data.append((nombre, precio, categoria_id, proveedor_id))
+
+# Generar datos para la tabla inventario
+inventario_data = []
+for _ in range(50):
+    producto_id = fake.random_int(min=1, max=50)
+    proveedor_id = fake.random_int(min=1, max=50)
+    cantidad = fake.random_int(min=1, max=100)
+    fecha_ingreso = fake.date_between(start_date='-1y', end_date='today')
+    inventario_data.append((producto_id, proveedor_id, cantidad, fecha_ingreso))
+
+# Insertar datos en la tabla clientes
+clientes_query = "INSERT INTO clientes (nombre, direccion, telefono) VALUES (%s, %s, %s)"
+cursor = cnx.cursor()
+cursor.executemany(clientes_query, clientes_data)
+cnx.commit()
+
+# Insertar datos en la tabla empleados
+empleados_query = "INSERT INTO empleados (nombre, direccion, telefono, salario) VALUES (%s, %s, %s, %s)"
+cursor.executemany(empleados_query, empleados_data)
+cnx.commit()
+
+# Insertar datos en la tabla proveedores
+proveedores_query = "INSERT INTO proveedores (nombre, direccion, telefono, salario) VALUES (%s, %s, %s, %s)"
+cursor.executemany(proveedores_query, proveedores_data)
+cnx.commit()
+
+# Insertar datos en la tabla categorias
+categorias_query = "INSERT INTO categorias (nombre) VALUES (%s)"
+cursor.executemany(categorias_query, categorias_data)
+cnx.commit()
+
+# Insertar datos en la tabla productos
+productos_query = "INSERT INTO productos (nombre, precio, categoria_id, proveedor_id) VALUES (%s, %s, %s, %s)"
+cursor.executemany(productos_query, productos_data)
+cnx.commit()
+
+# Insertar datos en la tabla inventario
+inventario_query = "INSERT INTO inventario (producto_id, proveedor_id, cantidad, fecha_ingreso) VALUES (%s, %s, %s, %s)"
+cursor.executemany(inventario_query, inventario_data)
+cnx.commit()
+
+# Insertar datos en la tabla pedidos
+pedidos_query = "INSERT INTO pedidos (cliente_id, fecha_pedido, total) VALUES (%s, %s, %s)"
+cursor.executemany(pedidos_query, pedidos_data)
+cnx.commit()
+
+# Insertar datos en la tabla detalles_pedido
+detalles_pedido_query = "INSERT INTO detalles_pedido (pedido_id, producto_id, cantidad, subtotal) VALUES (%s, %s, %s, %s)"
+cursor.executemany(detalles_pedido_query, detalles_pedido_data)
+cnx.commit()
+
+# Insertar datos en la tabla ventas
+ventas_query = "INSERT INTO ventas (cliente_id, fecha_venta, total) VALUES (%s, %s, %s)"
+cursor.executemany(ventas_query, ventas_data)
+cnx.commit()
+
+# Insertar datos en la tabla detalles_venta
+detalles_venta_query = "INSERT INTO detalles_venta (venta_id, producto_id, cantidad, subtotal) VALUES (%s, %s, %s, %s)"
+cursor.executemany(detalles_venta_query, detalles_venta_data)
+cnx.commit()
+
+# Cerrar la conexión a la base de datos
+cursor.close()
+cnx.close()
